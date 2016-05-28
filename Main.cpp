@@ -61,7 +61,7 @@ public:
 
 vector<string> split(const string &s, char delim);
 
-int main() 
+int main()
 {
 	map<string, Functor*> mfunc;
 	Functor *fshow = new FunctorShow;
@@ -71,24 +71,34 @@ int main()
 	string expression;
 	vector<string> expressions;
 	Functor *fctr;
-	cout << '>';
-	while (getline(cin, expression))
+	int N;
+	cout << "N = ";
+	cin >> N;
+	cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+	for (int i = 1; i <= N; i++)
 	{
+		cout << i << '>';
+		getline(cin, expression);
 		expressions = split(expression, ' ');
 		fctr = mfunc[expressions[0]];
+
 		if (fctr == nullptr)
 		{
-			cout << "Incorect operation\n";
-			cout << '>'; continue;
+			cout << "Incorrect operation\n";
+			i--; continue;
 		}
+
 		if (expressions.size() == 1)
 			(*fctr)();
 		else if (expressions.size() == 3)
 			(*fctr)(expressions[1], stoi(expressions[2]));
 		else
-			cout << "Incorect operation\n";
-		cout << '>';
+		{
+			cout << "Incorrect operation\n"; i--;
+		}
 	}
+
 	system("pause");
 	return 0;
 }
@@ -96,6 +106,7 @@ int main()
 void FunctorCreate::operator()(string classname, int value)
 {
 	Base* base;
+
 	if (classname == "A")
 		base = new A(value);
 	else if (classname == "B")
@@ -103,6 +114,7 @@ void FunctorCreate::operator()(string classname, int value)
 	else if (classname == "C")
 		base = new C(value);
 	else return;
+
 	objects.push_back(base);
 }
 

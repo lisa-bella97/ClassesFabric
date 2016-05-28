@@ -11,7 +11,6 @@ class Base
 protected:
 	int value;
 public:
-	Base() : value(0) {}
 	Base(int val) : value(val) {}
 	virtual void show() = 0;
 };
@@ -19,34 +18,22 @@ public:
 class A : public Base
 {
 public:
-	A() : Base() {}
 	A(int val) : Base(val) {}
-	void show()
-	{
-		cout << "class A: " << value << endl;
-	}
+	void show() { cout << "class A: " << value << endl; }
 };
 
 class B : public Base
 {
 public:
-	B() : Base() {}
 	B(int val) : Base(val) {}
-	void show()
-	{
-		cout << "class B: " << value << endl;
-	}
+	void show() { cout << "class B: " << value << endl; }
 };
 
 class C : public Base
 {
 public:
-	C() : Base() {}
 	C(int val) : Base(val) {}
-	void show()
-	{
-		cout << "class C: " << value << endl;
-	}
+	void show() { cout << "class C: " << value << endl; }
 };
 
 vector<Base*> objects;

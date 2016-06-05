@@ -6,6 +6,28 @@
 
 using namespace std;
 
+template<class ID, class Base, class ... Args> 
+class Factory 
+{
+private:
+	typedef Base* (*fInstantiator)(Args ...);
+	template<class Derived> static Base* instantiator(Args ... args) 
+	{
+		return new Derived(args ...);
+	}
+	map<ID, fInstantiator> classes;
+public:
+	Factory() {}
+	template<class Derived> void add(ID id) 
+	{
+		classes[id] = &instantiator<Derived>;
+	}
+	fInstantiator get(ID id) 
+	{
+		return classes[id];
+	}
+};
+
 class Base
 {
 protected:
@@ -36,44 +58,17 @@ public:
 	void show() { cout << "class C: " << value << endl; }
 };
 
-vector<Base*> objects;
-
-class Functor 
-{
-public:
-	virtual void operator()() {};
-	virtual void operator()(string, int) {};
-};
-
-class FunctorShow : public Functor 
-{
-public:
-	FunctorShow() {};
-	void operator()();
-};
-
-class FunctorCreate : public Functor 
-{
-public:
-	FunctorCreate() {};
-	void operator()(string classname, int value);
-};
-
 vector<string> split(const string &s, char delim);
 
 int main()
 {
-	map<string, Functor*> mfunc;
-	Functor *fshow = new FunctorShow;
-	Functor *fcreate = new FunctorCreate;
-	mfunc["showall"] = fshow;
-	mfunc["create"] = fcreate;
 	string expression;
 	vector<string> expressions;
-	Functor *fctr;
 	int N;
 	cout << "N = ";
 	cin >> N;
+	Factory<int, Base, int> factory;
+	vector<Base*> classes;
 	cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
 	for (int i = 1; i <= N; i++)
@@ -81,18 +76,26 @@ int main()
 		cout << i << '>';
 		getline(cin, expression);
 		expressions = split(expression, ' ');
-		fctr = mfunc[expressions[0]];
 
-		if (fctr == nullptr)
+		if (expressions.size() == 1 && expressions[0] == "showall")
 		{
-			cout << "Incorrect operation\n";
-			i--; continue;
+			for (auto it : classes)
+				it->show();
 		}
-
-		if (expressions.size() == 1)
-			(*fctr)();
-		else if (expressions.size() == 3)
-			(*fctr)(expressions[1], stoi(expressions[2]));
+		else if (expressions.size() == 3 && expressions[0] == "create")
+		{
+			if (expressions[1] == "A")
+				factory.add<A>(i);
+			else if (expressions[1] == "B")
+				factory.add<B>(i);
+			else if (expressions[1] == "C")
+				factory.add<C>(i);
+			else
+			{
+				cout << "Incorrect operation\n"; i--; continue;
+			}
+			classes.push_back(factory.get(i)(stoi(expressions[2])));
+		}
 		else
 		{
 			cout << "Incorrect operation\n"; i--;
@@ -101,27 +104,6 @@ int main()
 
 	system("pause");
 	return 0;
-}
-
-void FunctorCreate::operator()(string classname, int value)
-{
-	Base* base;
-
-	if (classname == "A")
-		base = new A(value);
-	else if (classname == "B")
-		base = new B(value);
-	else if (classname == "C")
-		base = new C(value);
-	else return;
-
-	objects.push_back(base);
-}
-
-void FunctorShow::operator()()
-{
-	for (auto it : objects)
-		it->show();
 }
 
 vector<string> split(const string &s, char delim)
